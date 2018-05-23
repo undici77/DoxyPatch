@@ -1,6 +1,7 @@
 # DoxyPatch
 Doxygen skeleton generator
 
+
 **Visual Studio external tools configuration**
 
 Command: DoxyPatch.exe
