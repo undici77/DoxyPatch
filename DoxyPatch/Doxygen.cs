@@ -15,26 +15,26 @@ namespace DoxygenManagerNameSpace
 	class Doxygen
 	{
 		/// @brief Recognize a doxygen brief tag
-		private static readonly string _DoxygenBriefRegex = @"^\/\/\/[\s]*@brief([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
+		private static readonly string _DoxygenBriefRegex = @"^[\s\t]*\/\/\/[\s\t]*@brief([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 		/// @brief Recognize a doxygen param tag
-		private static readonly string _DoxygenParamRegex = @"^\/\/\/[\s]*@param[\s]*([^\s]+)([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
+		private static readonly string _DoxygenParamRegex = @"^[\s\t]*\/\/\/[\s]*@param[\s]*([^\s]+)([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 		/// @brief Recognize a doxygen retval tag
-		private static readonly string _DoxygenRetvalRegex = @"^\/\/\/[\s]*@retval([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
+		private static readonly string _DoxygenRetvalRegex = @"^[\s\t]*\/\/\/[\s]*@retval([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 		/// @brief Recognize a generic doxygen tag
-		private static readonly string _DoxygenGenericRegex = @"^\/\/\/([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
+		private static readonly string _DoxygenGenericRegex = @"^[\s\t]*\/\/\/([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 
 		/// @brief Recognize a generic empty line
-		private static readonly string _GenericEmptyLineRegex = @"^\s*(\r\n|\r|\n)";
+		private static readonly string _GenericEmptyLineRegex = @"^[\s\t]*(\r\n|\r|\n)";
 		/// @brief Recognize a generic inline comment
-		private static readonly string _GenericInlineCommentRegex = @"^\s*\/\/([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
+		private static readonly string _GenericInlineCommentRegex = @"^[\s\t]*\/\/([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 		/// @brief Recognize a generic block comment
-		private static readonly string _GenericBlockCommentRegex = @"^\s*\/\*([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
+		private static readonly string _GenericBlockCommentRegex = @"^[\s\t]*\/\*([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 		/// @brief Recognize a generic line of code
 		private static readonly string _GenericLineRegex = @"^([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 
 		/// @brief Recognize a function
 		private static readonly string _FunctionRegex =
-		    @"^(\/\*[\/\*]*(\r\n|\r|\n))?((?!if\b|else\b|while\b|[\s*])(?:[\w:*~_&<>]+?\s+){1,6})([\w:*~_&]+\s*)\(([^);]*)\)[^{;]*?(?:^[^\r\n{]*;?[\s]+){0,10}\{(\r\n|\r|\n)";
+			@"^([\s\t]*)(\/\*[\/\*]*(\r\n|\r|\n))?((?!if\b|else\b|switch\b|case\b|lock\b|using\b|while\b|new\b|catch\b|for\b|foreach\b|[\s*])(?:[\w:*~_&<>]+?\s+){0,6})([\w:*~_&]+\s*)\(([^);]*)\)[^{#;]*?(?:^[^\r\n{]#*;?[\s]+){0,10}\{(\r\n|\r|\n)";
 
 		/// @brief Thread descriptor
 		private static Thread _Thread;
@@ -339,6 +339,7 @@ namespace DoxygenManagerNameSpace
 			List<Match> doxygen_retval_param;
 			bool doxygen_retval;
 
+			string function_align;
 			string function_name;
 			List<string> parameters;
 			List<string> function_parameters;
@@ -398,10 +399,14 @@ namespace DoxygenManagerNameSpace
 			while (!done);
 
 			// Function data extraction
-			function_return_parameter = function_match.Groups[3].Value.Replace("*", "").Replace("&", "").Replace("[]", "");
+			function_align            = function_match.Groups[1].Value;
+			function_return_parameter = function_match.Groups[4].Value;
+			function_return_parameter = function_return_parameter.Replace("*", "").Replace("&", "").Replace("[]", "").Replace(" ", "");
+			function_return_parameter = function_return_parameter.Replace("private", "").Replace("public", "").Replace("protected", "").Replace("internal", "");
+			function_return_parameter = function_return_parameter.Replace("Private", "").Replace("Public", "").Replace("Protected", "").Replace("Internal", "");
 			function_return_parameter = array_brackets_remover.Replace(function_return_parameter, "");
 
-			function_name = function_match.Groups[4].Value.Trim().Replace("*", "").Replace("&", "").Replace("[]", "");
+			function_name = function_match.Groups[5].Value.Trim().Replace("*", "").Replace("&", "").Replace("[]", "");
 			function_name = array_brackets_remover.Replace(function_name, "");
 
 			buffer = function_match.Value;
@@ -452,7 +457,7 @@ namespace DoxygenManagerNameSpace
 				{
 				}
 			}
-			function_return = ((function_match.Groups[3].Value.Length != 0) && (!function_match.Groups[3].Value.Contains("void") || (function_match.Groups[4].Value.StartsWith("*"))));
+			function_return = ((function_return_parameter.Length > 0) && !function_return_parameter.Contains("void"));
 
 			write_to_file = false;
 
@@ -462,15 +467,15 @@ namespace DoxygenManagerNameSpace
 				// No Doxygen header found: adding new empty skeleton
 				error_log.Add(function_name + " - empty doxygen header added");
 
-				doxygen_comments = "/// @brief\r\n///\r\n";
+				doxygen_comments = function_align + "/// @brief\r\n" + function_align + "///\r\n";
 				foreach (string p in function_parameters)
 				{
-					doxygen_comments += "/// @param " + p + "\r\n";
+					doxygen_comments += function_align + "/// @param " + p + "\r\n";
 				}
 
 				if (function_return)
 				{
-					doxygen_comments += "/// @retval\r\n";
+					doxygen_comments += function_align + "/// @retval\r\n";
 				}
 
 				doxygen_comments += non_doxygen_data;
