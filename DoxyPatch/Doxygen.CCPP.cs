@@ -36,6 +36,10 @@ class DoxygenCCPP
 	private static readonly string _Function_Regex =
 	    @"^(\/\*[\/\*]*(\r\n|\r|\n))?((?!if\b|else\b|while\b|[\s*])(?:[\w:*~_&<>]+?\s+){1,6})([\w:*~_&]+\s*)\(([^);]*)\)[^{;]*?(?:^[^\r\n{]*;?[\s]+){0,10}\{(\r\n|\r|\n)";
 
+	/// @brief Recognize a constructor/destructor
+	private static readonly string _Constructor_Regex =
+	    @"^(\/\*[\/\*]*(\r\n|\r|\n))?((?!if\b|else\b|while\b|[\s*]))([\w:*~_&]+)\:\:([\w:*~_&]+\s*)\(([^);]*)\)[^{;]*?(?:^[^\r\n{]*;?[\s]+){0,10}\{(\r\n|\r|\n)";
+
 	/// @brief Split function parameters taking care about template
 	private static readonly string _Split_Function_Parameters =
 	    @"([\s\&\*\:\w]*[\<]+[\w\:\s\[\]\(\)\<\>]*[\>]+[\s\&\*\:\w]*)[\,]*|([\s\&\*\:\w]*[\<]+[\w\:\,\s\[\]\(\)\<\>]*[\>]+[\s\&\*\:\w]*)[\,]*|([\s\&\*\:\w]*[\<]+[\w\:\&\*\s\[\]\(\)\<\>]*[\>]+[\s\&\*\:\w]*)[\,]*|([\s\&\*\:\w]*[\<]+[\w\:\&\*\,\s\[\]\(\)\<\>]*[\>]+[\s\&\*\:\w]*)[\,]*|([\s\&\*\[\]\:\w]*)[\,]*";
@@ -62,6 +66,7 @@ class DoxygenCCPP
 		string input;
 		Match doxygen_generic_match;
 		Match function_match;
+		Match constructor_match;
 		Match generic_inline_match;
 		Match generic_block_match;
 		Match generic_empty_match;
@@ -95,6 +100,7 @@ class DoxygenCCPP
 			doxygen_generic_match = Regex.Match(input, _Doxygen_Generic_Regex);
 
 			function_match = Regex.Match(input, _Function_Regex);
+			constructor_match = Regex.Match(input, _Constructor_Regex);
 
 			generic_inline_match = Regex.Match(input, _Generic_Inline_Comment_Regex);
 			generic_block_match = Regex.Match(input, _Generic_Block_Comment_Regex);
@@ -154,6 +160,37 @@ class DoxygenCCPP
 
 				// Deletion of matched lines
 				input = input.Substring(function_match.Value.Length);
+			}
+			else if (ConstructorMatch(constructor_match))
+			{
+				// Comparsion of Doxygen saved comment block with function name
+				// This function should generate a empty skeleton doxygen_block in case of nothing match (function without block comment),
+				// or generate warning in case Doxygen skeleton is present but not correct
+				if (AnalyzeDoxygenCommentBlock(constructor_match, ref doxygen_block.data, out error_log, out warning_log))
+				{
+					write_to_file = true;
+				}
+
+				foreach (string l in warning_log)
+				{
+					Log.Instance.AppendWarning(l, file_name, (output.lines_number + 1));
+				}
+
+				foreach (string l in error_log)
+				{
+					Log.Instance.AppendError(l, file_name, (output.lines_number + 1));
+				}
+
+				// Adding to output Doxygen block data generated from function AnalyzeDoxygenCommentBlock.
+				AddDataToBuffer(ref output, doxygen_block.data);
+				doxygen_block.data = "";
+				doxygen_block.lines_number = 0;
+
+				// Adding function header
+				AddDataToBuffer(ref output, constructor_match);
+
+				// Deletion of matched lines
+				input = input.Substring(constructor_match.Value.Length);
 			}
 			else if (generic_inline_match.Success)
 			{
@@ -228,12 +265,12 @@ class DoxygenCCPP
 
 	/// @brief Verify and Generate Doxygen header
 	///
-	/// @param function_match regex matching of function
+	/// @param input_match regex matching of input function/constructor
 	/// @param doxygen_comments comment found before function
 	/// @param error_log list of errors
 	/// @param warning_log list of warning
 	/// @retval true write comments to file (no Doxygen header found), false nothing to write (Doxygen header found)
-	private bool AnalyzeDoxygenCommentBlock(Match function_match, ref string doxygen_comments, out List<string> error_log, out List<string> warning_log)
+	private bool AnalyzeDoxygenCommentBlock(Match input_match, ref string doxygen_comments, out List<string> error_log, out List<string> warning_log)
 	{
 		int id;
 		bool done;
@@ -244,6 +281,7 @@ class DoxygenCCPP
 		Match doxygen_retval_match;
 		Match generic_line_match;
 		Regex array_brackets_remover;
+		Regex constructor_init_formatter;
 
 		string buffer;
 		string non_doxygen_data;
@@ -275,6 +313,7 @@ class DoxygenCCPP
 		doxygen_retval = false;
 
 		array_brackets_remover = new Regex(@"\[(.*?)\]");
+		constructor_init_formatter = new Regex(@"(\)\s*:)|(\)\s*noexcept\s*:)");
 
 		done = false;
 		// comments data extraction
@@ -320,18 +359,23 @@ class DoxygenCCPP
 		while (!done);
 
 		// Function data extraction
-		function_return_parameter = function_match.Groups[3].Value.Replace("*", "").Replace("&", "").Replace("[]", "");
+		function_return_parameter = input_match.Groups[3].Value.Replace("*", "").Replace("&", "").Replace("[]", "");
 		function_return_parameter = array_brackets_remover.Replace(function_return_parameter, "");
 
-		function_name = function_match.Groups[4].Value.Trim().Replace("*", "").Replace("&", "").Replace("[]", "");
+		function_name = input_match.Groups[4].Value.Trim().Replace("*", "").Replace("&", "").Replace("[]", "");
 		function_name = array_brackets_remover.Replace(function_name, "");
 
-		buffer = function_match.Value;
+		buffer = input_match.Value;
 		begin_parameters_index = buffer.IndexOf(function_name) + function_name.Length;
 		buffer = buffer.Substring(begin_parameters_index);
 
+		buffer = constructor_init_formatter.Replace(buffer, "):");
 		begin_parameters_index = buffer.IndexOf('(');
-		end_parameters_index = buffer.LastIndexOf(')');
+		end_parameters_index = buffer.LastIndexOf("):");
+		if (end_parameters_index == -1)
+		{
+			end_parameters_index = buffer.LastIndexOf(')');
+		}
 		buffer = buffer.Substring(begin_parameters_index + 1, end_parameters_index - begin_parameters_index - 1);
 
 		// Function parameters extraction
@@ -391,7 +435,7 @@ class DoxygenCCPP
 			{
 			}
 		}
-		function_return = ((function_match.Groups[3].Value.Length != 0) && (!function_match.Groups[3].Value.Contains("void") || (function_match.Groups[4].Value.StartsWith("*"))));
+		function_return = ((input_match.Groups[3].Value.Length != 0) && (!input_match.Groups[3].Value.Contains("void") || (input_match.Groups[4].Value.StartsWith("*"))));
 
 		write_to_file = false;
 
@@ -423,7 +467,7 @@ class DoxygenCCPP
 			{
 				error_log.Add(function_name + " - @brief not found, add it manually");
 			}
-			else if (doxygen_brief.Count == (doxygen_class.Count + 1))
+			else if (doxygen_brief.Count == 1)
 			{
 				if (doxygen_brief[0].Groups[1].Value.Trim() == "")
 				{
@@ -432,7 +476,25 @@ class DoxygenCCPP
 			}
 			else
 			{
-				error_log.Add(function_name + " - more than 1 @brief detected, fix it");
+				foreach (Match match in doxygen_brief)
+				{
+					if (match.Groups[1].Value.Trim() == "")
+					{
+						warning_log.Add(function_name + " - empty @brief detected, fix it");
+					}
+				}
+			}
+
+			if (doxygen_class.Count == 1)
+			{
+				if (doxygen_class[0].Groups[1].Value.Trim() == "")
+				{
+					warning_log.Add(function_name + " - empty @class detected, fix it");
+				}
+			}
+			else if (doxygen_class.Count > 1)
+			{
+				error_log.Add(function_name + " - more than 1 @class detected, fix it");
 			}
 
 			foreach (string p in function_parameters)
@@ -564,4 +626,27 @@ class DoxygenCCPP
 		return (false);
 	}
 
+	/// @brief Verify if constructor match parameters are correct
+	///
+	/// @retval true parameters correct, false parameters not correct
+	private bool ConstructorMatch(Match match)
+	{
+		bool result;
+
+		result = false;
+
+		if (match.Success)
+		{
+			if ((match.Groups[3].Value == null) || (match.Groups[3].Value == ""))
+			{
+				if ((match.Groups[4].Value       == match.Groups[5].Value) ||
+				    ("~" + match.Groups[4].Value == match.Groups[5].Value))
+				{
+					result = true;
+				}
+			}
+		}
+
+		return (result);
+	}
 }

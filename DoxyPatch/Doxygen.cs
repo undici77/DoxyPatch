@@ -149,6 +149,7 @@ namespace DoxygenManagerNameSpace
 					_Doxygen_CSharp.VerifyAndGenerate(file_name);
 					break;
 
+				case ".h":
 				case ".hpp":
 					_Doxygen_HPP.VerifyAndGenerate(file_name);
 					break;
