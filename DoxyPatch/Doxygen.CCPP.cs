@@ -17,7 +17,7 @@ class DoxygenCCPP
 	/// @brief Recognize a doxygen brief tag
 	private static readonly string _Doxygen_Brief_Regex = @"^\/\/\/[\s]*@brief([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a doxygen param tag
-	private static readonly string _Doxygen_Param_Regex = @"^\/\/\/[\s]*@param[\s]*([^\s\[]+)(\[[\w]*\])*([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
+	private static readonly string _Doxygen_Param_Regex = @"^\/\/\/[\s]*@param[\s]*(\[[\w]*\])*[\s]*([^\s]+)([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a doxygen retval tag
 	private static readonly string _Doxygen_Retval_Regex = @"^\/\/\/[\s]*@retval([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a generic doxygen tag
@@ -520,7 +520,7 @@ class DoxygenCCPP
 				}
 				else
 				{
-					error_log.Add(function_name + " - @param '" + p.Groups[1].Value + "' not present, remove it manually");
+					error_log.Add(function_name + " - @param '" + p.Groups[2].Value + "' not present, remove it manually");
 				}
 			}
 
@@ -602,7 +602,7 @@ class DoxygenCCPP
 		pattern = pattern.Trim();
 		foreach (Match s in list)
 		{
-			if (s.Groups[1].Value.Trim() == pattern)
+			if (s.Groups[2].Value.Trim() == pattern)
 			{
 				return (true);
 			}
@@ -618,7 +618,7 @@ class DoxygenCCPP
 	{
 		string p;
 
-		p = pattern.Groups[1].Value.Trim();
+		p = pattern.Groups[2].Value.Trim();
 		foreach (string s in list)
 		{
 			if (p == s.Trim())

@@ -17,7 +17,7 @@ class DoxygenCSharp
 	/// @brief Recognize a doxygen brief tag
 	private static readonly string _Doxygen_Brief_Regex = @"^[\s\t]*\/\/\/[\s\t]*@brief([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a doxygen param tag
-	private static readonly string _Doxygen_Param_Regex = @"^[\s\t]*\/\/\/[\s]*@param[\s]*([^\s\[]+)(\[[\w]*\])*([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
+	private static readonly string _Doxygen_Param_Regex = @"^[\s\t]*\/\/\/[\s]*@param[\s]*(\[[\w]*\])*[\s]*([^\s]+)([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a doxygen retval tag
 	private static readonly string _Doxygen_Retval_Regex = @"^[\s\t]*\/\/\/[\s]*@retval([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a generic doxygen tag
@@ -427,7 +427,7 @@ class DoxygenCSharp
 			{
 				error_log.Add(function_name + " - @brief not found, add it manually");
 			}
-			else if (doxygen_brief.Count == (doxygen_class.Count + 1))
+			else if (doxygen_brief.Count == 1)
 			{
 				if (doxygen_brief[0].Groups[1].Value.Trim() == "")
 				{
@@ -436,7 +436,25 @@ class DoxygenCSharp
 			}
 			else
 			{
-				error_log.Add(function_name + " - more than 1 @brief detected, fix it");
+				foreach (Match match in doxygen_brief)
+				{
+					if (match.Groups[1].Value.Trim() == "")
+					{
+						warning_log.Add(function_name + " - empty @brief detected, fix it");
+					}
+				}
+			}
+
+			if (doxygen_class.Count == 1)
+			{
+				if (doxygen_class[0].Groups[1].Value.Trim() == "")
+				{
+					warning_log.Add(function_name + " - empty @class detected, fix it");
+				}
+			}
+			else if (doxygen_class.Count > 1)
+			{
+				error_log.Add(function_name + " - more than 1 @class detected, fix it");
 			}
 
 			foreach (string p in function_parameters)
@@ -458,7 +476,7 @@ class DoxygenCSharp
 				}
 				else
 				{
-					error_log.Add(function_name + " - @param '" + p.Groups[1].Value + "' not present, remove it manually");
+					error_log.Add(function_name + " - @param '" + p.Groups[2].Value + "' not present, remove it manually");
 				}
 			}
 
@@ -540,7 +558,7 @@ class DoxygenCSharp
 		pattern = pattern.Trim();
 		foreach (Match s in list)
 		{
-			if (s.Groups[1].Value.Trim() == pattern)
+			if (s.Groups[2].Value.Trim() == pattern)
 			{
 				return (true);
 			}
@@ -556,7 +574,7 @@ class DoxygenCSharp
 	{
 		string p;
 
-		p = pattern.Groups[1].Value.Trim();
+		p = pattern.Groups[2].Value.Trim();
 		foreach (string s in list)
 		{
 			if (p == s.Trim())
