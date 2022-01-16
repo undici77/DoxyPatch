@@ -17,7 +17,7 @@ class DoxygenCSharp
 	/// @brief Recognize a doxygen brief tag
 	private static readonly string _Doxygen_Brief_Regex = @"^[\s\t]*\/\/\/[\s\t]*@brief([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a doxygen param tag
-	private static readonly string _Doxygen_Param_Regex = @"^[\s\t]*\/\/\/[\s]*@param[\s]*([^\s]+)([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
+	private static readonly string _Doxygen_Param_Regex = @"^[\s\t]*\/\/\/[\s]*@param[\s]*([^\s\[]+)(\[[\w]*\])*([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a doxygen retval tag
 	private static readonly string _Doxygen_Retval_Regex = @"^[\s\t]*\/\/\/[\s]*@retval([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a generic doxygen tag
@@ -381,6 +381,11 @@ class DoxygenCSharp
 						{
 							buffer = buffer.Substring(begin_parameters_index + 1);
 						}
+						begin_parameters_index = buffer.LastIndexOf(')');
+						if (begin_parameters_index != -1)
+						{
+							buffer = buffer.Substring(begin_parameters_index + 1);
+						}
 
 						function_parameters.Add(buffer);
 					}
@@ -446,7 +451,7 @@ class DoxygenCSharp
 			{
 				if (ParamListContains(p, function_parameters))
 				{
-					if (p.Groups[2].Value.Trim() == "")
+					if (p.Groups[3].Value.Trim() == "")
 					{
 						warning_log.Add(function_name + " - empty @param " + p.Groups[1].Value + " detected, fix it");
 					}

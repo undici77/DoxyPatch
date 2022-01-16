@@ -17,7 +17,7 @@ class DoxygenCCPP
 	/// @brief Recognize a doxygen brief tag
 	private static readonly string _Doxygen_Brief_Regex = @"^\/\/\/[\s]*@brief([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a doxygen param tag
-	private static readonly string _Doxygen_Param_Regex = @"^\/\/\/[\s]*@param[\s]*([^\s]+)([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
+	private static readonly string _Doxygen_Param_Regex = @"^\/\/\/[\s]*@param[\s]*([^\s\[]+)(\[[\w]*\])*([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a doxygen retval tag
 	private static readonly string _Doxygen_Retval_Regex = @"^\/\/\/[\s]*@retval([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a generic doxygen tag
@@ -43,6 +43,9 @@ class DoxygenCCPP
 	/// @brief Split function parameters taking care about template
 	private static readonly string _Split_Function_Parameters =
 	    @"([\s\&\*\:\w]*[\<]+[\w\:\s\[\]\(\)\<\>]*[\>]+[\s\&\*\:\w]*)[\,]*|([\s\&\*\:\w]*[\<]+[\w\:\,\s\[\]\(\)\<\>]*[\>]+[\s\&\*\:\w]*)[\,]*|([\s\&\*\:\w]*[\<]+[\w\:\&\*\s\[\]\(\)\<\>]*[\>]+[\s\&\*\:\w]*)[\,]*|([\s\&\*\:\w]*[\<]+[\w\:\&\*\,\s\[\]\(\)\<\>]*[\>]+[\s\&\*\:\w]*)[\,]*|([\s\&\*\[\]\:\w]*)[\,]*";
+
+	/// @brief Test if string has lambda inside
+	private static readonly string _Is_Lambda = @"(\[[^\]]*\])[\s]*\([^\)]*";
 
 	/// @brief Buffer containing data and lines number
 	private struct BUFFER
@@ -282,6 +285,7 @@ class DoxygenCCPP
 		Match generic_line_match;
 		Regex array_brackets_remover;
 		Regex constructor_init_formatter;
+		Match is_lambda;
 
 		string buffer;
 		string non_doxygen_data;
@@ -370,6 +374,7 @@ class DoxygenCCPP
 		buffer = buffer.Substring(begin_parameters_index);
 
 		buffer = constructor_init_formatter.Replace(buffer, "):");
+		is_lambda = Regex.Match(buffer, _Is_Lambda);
 		begin_parameters_index = buffer.IndexOf('(');
 		end_parameters_index = buffer.LastIndexOf("):");
 		if (end_parameters_index == -1)
@@ -415,7 +420,6 @@ class DoxygenCCPP
 					{
 						buffer = fp[fp.Count - 1].Replace("*", "").Replace("&", "").Replace("[]", "");
 						buffer = array_brackets_remover.Replace(buffer, "");
-
 						begin_parameters_index = buffer.LastIndexOf('>');
 						if (begin_parameters_index != -1)
 						{
@@ -435,7 +439,7 @@ class DoxygenCCPP
 			{
 			}
 		}
-		function_return = ((input_match.Groups[3].Value.Length != 0) && (!input_match.Groups[3].Value.Contains("void") || (input_match.Groups[4].Value.StartsWith("*"))));
+		function_return = (!is_lambda.Success && (input_match.Groups[3].Value.Length != 0) && (!input_match.Groups[3].Value.Contains("void") || (input_match.Groups[4].Value.StartsWith("*"))));
 
 		write_to_file = false;
 
@@ -509,7 +513,7 @@ class DoxygenCCPP
 			{
 				if (ParamListContains(p, function_parameters))
 				{
-					if (p.Groups[2].Value.Trim() == "")
+					if (p.Groups[3].Value.Trim() == "")
 					{
 						warning_log.Add(function_name + " - empty @param " + p.Groups[1].Value + " detected, fix it");
 					}

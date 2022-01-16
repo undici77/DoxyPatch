@@ -44,6 +44,9 @@ class DoxygenHPP
 	private static readonly string _Split_Function_Parameters =
 	    @"([\s\&\*\:\w]*[\<]+[\w\:\s\[\]\(\)\<\>]*[\>]+[\s\&\*\:\w]*)[\,]*|([\s\&\*\:\w]*[\<]+[\w\:\,\s\[\]\(\)\<\>]*[\>]+[\s\&\*\:\w]*)[\,]*|([\s\&\*\:\w]*[\<]+[\w\:\&\*\s\[\]\(\)\<\>]*[\>]+[\s\&\*\:\w]*)[\,]*|([\s\&\*\:\w]*[\<]+[\w\:\&\*\,\s\[\]\(\)\<\>]*[\>]+[\s\&\*\:\w]*)[\,]*|([\s\&\*\[\]\:\w]*)[\,]*";
 
+	/// @brief Test if string has lambda inside
+	private static readonly string _Is_Lambda = @"(\[[^\]]*\])[\s]*\([^\)]*";
+
 	/// @brief Buffer containing data and lines number
 	private struct BUFFER
 	{
@@ -282,6 +285,7 @@ class DoxygenHPP
 		Match generic_line_match;
 		Regex array_brackets_remover;
 		Regex constructor_init_formatter;
+		Match is_lambda;
 
 		string buffer;
 		string non_doxygen_data;
@@ -375,6 +379,7 @@ class DoxygenHPP
 		buffer = buffer.Substring(begin_parameters_index);
 
 		buffer = constructor_init_formatter.Replace(buffer, "):");
+		is_lambda = Regex.Match(buffer, _Is_Lambda);
 		begin_parameters_index = buffer.IndexOf('(');
 		end_parameters_index = buffer.LastIndexOf("):");
 		if (end_parameters_index == -1)
@@ -420,7 +425,6 @@ class DoxygenHPP
 					{
 						buffer = fp[fp.Count - 1].Replace("*", "").Replace("&", "").Replace("[]", "");
 						buffer = array_brackets_remover.Replace(buffer, "");
-
 						begin_parameters_index = buffer.LastIndexOf('>');
 						if (begin_parameters_index != -1)
 						{
@@ -440,7 +444,7 @@ class DoxygenHPP
 			{
 			}
 		}
-		function_return = ((function_return_parameter.Length > 0) && !function_return_parameter.Contains("void"));
+		function_return = (!is_lambda.Success && (function_return_parameter.Length > 0) && !function_return_parameter.Contains("void"));
 
 		write_to_file = false;
 
@@ -514,7 +518,7 @@ class DoxygenHPP
 			{
 				if (ParamListContains(p, function_parameters))
 				{
-					if (p.Groups[2].Value.Trim() == "")
+					if (p.Groups[3].Value.Trim() == "")
 					{
 						warning_log.Add(function_name + " - empty @param " + p.Groups[1].Value + " detected, fix it");
 					}
