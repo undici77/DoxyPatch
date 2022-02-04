@@ -17,9 +17,9 @@ class DoxygenHPP
 	/// @brief Recognize a doxygen brief tag
 	private static readonly string _Doxygen_Brief_Regex = @"^[\s\t]*\/\/\/[\s\t]*@brief([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a doxygen param tag
-	private static readonly string _Doxygen_Param_Regex = @"^[\s\t]*\/\/\/[\s]*@param[\s]*(\[[\w]*\])*[\s]*([^\s]+)([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
+	private static readonly string _Doxygen_Param_Regex = @"^[\s\t]*\/\/\/[\s\t]*@param[\s]*(\[[\w]*\])*[\s]*([^\s\[]+)*(\[[\w]*\])*([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a doxygen retval tag
-	private static readonly string _Doxygen_Retval_Regex = @"^[\s\t]*\/\/\/[\s]*@retval([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
+	private static readonly string _Doxygen_Retval_Regex = @"^[\s\t]*\/\/\/[\s\t]*@retval([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a generic doxygen tag
 	private static readonly string _Doxygen_Generic_Regex = @"^[\s\t]*\/\/\/([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 
@@ -518,9 +518,9 @@ class DoxygenHPP
 			{
 				if (ParamListContains(p, function_parameters))
 				{
-					if (p.Groups[3].Value.Trim() == "")
+					if (p.Groups[4].Value.Trim() == "")
 					{
-						warning_log.Add(function_name + " - empty @param " + p.Groups[1].Value + " detected, fix it");
+						warning_log.Add(function_name + " - empty @param " + p.Groups[2].Value + " detected, fix it");
 					}
 				}
 				else

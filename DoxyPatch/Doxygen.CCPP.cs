@@ -17,7 +17,7 @@ class DoxygenCCPP
 	/// @brief Recognize a doxygen brief tag
 	private static readonly string _Doxygen_Brief_Regex = @"^\/\/\/[\s]*@brief([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a doxygen param tag
-	private static readonly string _Doxygen_Param_Regex = @"^\/\/\/[\s]*@param[\s]*(\[[\w]*\])*[\s]*([^\s]+)([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
+	private static readonly string _Doxygen_Param_Regex = @"^\/\/\/[\s]*@param[\s]*(\[[\w]*\])*[\s]*([^\s\[]+)*(\[[\w]*\])*([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a doxygen retval tag
 	private static readonly string _Doxygen_Retval_Regex = @"^\/\/\/[\s]*@retval([^\r\n]*(?:\\.[^\r\n]*)*(\r\n|\r|\n))";
 	/// @brief Recognize a generic doxygen tag
@@ -114,7 +114,7 @@ class DoxygenCCPP
 			{
 				if (doxygen_block.lines_number > 0)
 				{
-					// Saving of a empty line, to compare after with a body funtion
+					// Saving of a empty line, to compare after with a body function
 					AddDataToBuffer(ref doxygen_block, generic_empty_match);
 				}
 				else
@@ -127,7 +127,7 @@ class DoxygenCCPP
 			}
 			else if (doxygen_generic_match.Success)
 			{
-				// Saving of a generic Doxygen line, to compare after with a body funtion
+				// Saving of a generic Doxygen line, to compare after with a body function
 				AddDataToBuffer(ref doxygen_block, doxygen_generic_match);
 
 				// Deletion of matched lines
@@ -214,7 +214,7 @@ class DoxygenCCPP
 			{
 				if (doxygen_block.lines_number > 0)
 				{
-					// Saving of a generic block of code, to compare after with a body funtion
+					// Saving of a generic block of code, to compare after with a body function
 					AddDataToBuffer(ref doxygen_block, generic_block_match);
 				}
 				else
@@ -513,9 +513,9 @@ class DoxygenCCPP
 			{
 				if (ParamListContains(p, function_parameters))
 				{
-					if (p.Groups[3].Value.Trim() == "")
+					if (p.Groups[4].Value.Trim() == "")
 					{
-						warning_log.Add(function_name + " - empty @param " + p.Groups[1].Value + " detected, fix it");
+						warning_log.Add(function_name + " - empty @param " + p.Groups[2].Value + " detected, fix it");
 					}
 				}
 				else
