@@ -14,9 +14,6 @@ namespace DoxyPatch
 {
 	class Program
 	{
-		[DllImport("winmm.dll", EntryPoint = "timeBeginPeriod", SetLastError = true)]
-		private static extern uint TimeBeginPeriod(uint uMilliseconds);
-
 		static string _Version;
 		static string _Name;
 		static string _Path;
@@ -28,8 +25,6 @@ namespace DoxyPatch
 
 		static void Main(string[] args)
 		{
-			TimeBeginPeriod(1);
-
 			Assembly assembly = Assembly.GetExecutingAssembly();
 			FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
 
