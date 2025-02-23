@@ -1,7 +1,7 @@
-# Imposta la modalità di errore per fermarsi in caso di problemi
+# Set error action preference to stop on errors
 $ErrorActionPreference = "Stop"
 
-# Definizione dei target di pubblicazione
+# Define the publish targets
 $targets = @(
     "win-x64"
     "win-arm64"
@@ -11,25 +11,25 @@ $targets = @(
     "osx-arm64"
 )
 
-# Percorso del progetto e della cartella dei modelli
+# Project path and models directory
 $projectPath = "Src/DoxyPatch.csproj"
 $modelsDir = "./Models"
 
-# Ottieni l'hash dell'ultimo commit Git
+# Get the short hash of the latest Git commit
 $gitHash = git rev-parse --short HEAD 2>$null
 if (-not $gitHash) {
     Write-Host "Could not retrieve Git commit hash. Exiting..."
     exit 1
 }
 
-# Rimuove e ricrea la directory artifacts
+# Remove and recreate the artifacts directory
 $artifactsDir = "artifacts"
 if (Test-Path $artifactsDir) {
     Remove-Item -Recurse -Force $artifactsDir
 }
 New-Item -ItemType Directory -Path $artifactsDir | Out-Null
 
-# Loop sui target di pubblicazione
+# Loop through each publish target
 foreach ($target in $targets) {
     $outputDir = "output/$target"
 
@@ -41,13 +41,13 @@ foreach ($target in $targets) {
     }
     Write-Host "Publish completed."
 
-    # Creazione della cartella Models e copia dei file
+    # Create Models directory and copy files
     $modelsOutputDir = "$outputDir/Models"
     New-Item -ItemType Directory -Path $modelsOutputDir -Force | Out-Null
     Copy-Item -Path "$modelsDir\*" -Destination $modelsOutputDir -Recurse -Force
     Write-Host "Files copied into $target's Models folder."
 
-    # Creazione dell'archivio ZIP
+    # Create ZIP archive
     $zipFile = "$artifactsDir/${target}_${gitHash}.zip"
     Compress-Archive -Path $outputDir -DestinationPath $zipFile -Force
     Write-Host "ZIP archive created: $zipFile."

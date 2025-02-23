@@ -1,12 +1,12 @@
 [![Build and Release](https://github.com/undici77/DoxyPatch/actions/workflows/dotnet-desktop.yml/badge.svg)](https://github.com/undici77/DoxyPatch/actions/workflows/dotnet-desktop.yml)
 
-# **Doxypatch**
+# **DoxyPatch**
 
 A tool for generating and verifying **Doxygen** comments for C, C++, and C# code.
 
 ## **Introduction**
 
-**Doxypatch** is a command-line tool designed to simplify the creation and verification of **Doxygen** comments for C, C++, and C# code. It utilizes a combination of regular expressions and **AI-powered models** to generate high-quality comments that adhere to the **Doxygen syntax**.
+**DoxyPatch** is a command-line tool designed to simplify the creation and verification of **Doxygen** comments for C, C++, and C# code. It utilizes a combination of regular expressions and **AI-powered models** to generate high-quality comments that adhere to the **Doxygen syntax**.
 
 ## **Features**
 
@@ -18,7 +18,7 @@ A tool for generating and verifying **Doxygen** comments for C, C++, and C# code
 
 ## **Long Story Short**
 
-**Doxypatch** was born out of the need for a tool to simplify the creation and verification of **Doxygen** comments. Initially developed as an external tool due to the lack of support in embedded compilers/IDEs, it has evolved over time to support multiple languages and **AI-powered models**.
+**DoxyPatch** was born out of the need for a tool to simplify the creation and verification of **Doxygen** comments. Initially developed as an external tool due to the lack of support in embedded compilers/IDEs, it has evolved over time to support multiple languages and **AI-powered models**.
 
 ## **Requirements**
 
@@ -29,13 +29,14 @@ A tool for generating and verifying **Doxygen** comments for C, C++, and C# code
 ## **Compile Project from Source Code**
 
 1. Install **.NET 9 SDK**
-2. Clone this repository: `git clone https://github.com/undici77/doxypatch.git`
+2. Clone this repository: `git clone https://github.com/undici77/DoxyPatch.git`
 3. Run `build_all.sh` or `build_all.ps1`: Files available in `artifacts` folder 
 
 ## **Installation**
 
-1. Unzip file based on your architecture
-2. Folder should be like:
+1. Install the Ollama AI backend: follow the instructions on the [Ollama website](https://ollama.ai/)
+2. Unzip file based on your architecture
+3. Folder should be like:
 
 ```markdown
 .
@@ -46,7 +47,7 @@ A tool for generating and verifying **Doxygen** comments for C, C++, and C# code
     `-- doxypatch-with-context
 ```
 
-**Note:** When running **Doxypatch** with the **Ollama** feature for the first time, if the required models (`doxypatch` and `doxypatch-with-context`) are not present in the `Models` folder, they will be automatically downloaded. This ensures that you have the necessary models to take full advantage of the **AI-powered** capabilities of **Doxypatch**.
+**Note:** When running **DoxyPatch** with the **Ollama** feature for the first time, if the required models (`DoxyPatch` and `DoxyPatch-with-context`) are not present in the `Models` folder, they will be automatically downloaded. This ensures that you have the necessary models to take full advantage of the **AI-powered** capabilities of **DoxyPatch**.
 
 ## **Usage**
 
@@ -69,20 +70,20 @@ Options:
     c, --with-context
         Pass the entire source code as context for more accurate documentation generation (experimental feature).
     m, --dry-mode
-        Run **doxypatch** in dry mode, simulating the documentation generation process without making any actual changes.
+        Run **DoxyPatch** in dry mode, simulating the documentation generation process without making any actual changes.
     d, --delay
         Specify a delay in seconds between processing files to avoid overheating GPU and CPU.
 ```
 
 ## **Configuration**
 
-The `DoxyPatch.ini` is automatically generated at first start and contains configuration settings for the tool. You can modify this file to customize the behavior of **Doxypatch**.
+The `DoxyPatch.ini` is automatically generated at first start and contains configuration settings for the tool. You can modify this file to customize the behavior of **DoxyPatch**.
 
 ```ini
 [Ollama]
 Address="http://localhost:11434"
-ModelName="doxypatch:latest"
-ModelNameWithContext="doxypatch-with-context:latest"
+ModelName="DoxyPatch:latest"
+ModelNameWithContext="DoxyPatch-with-context:latest"
 PrePrompt="Please provide your best effort, in **English**, adhering to the rules for this method written in '{LANG}':"
 PrePromptWithClass="Please provide your best effort, in **English**, adhering to the rules for this '{CLASS}' class method written in '{LANG}':"
 ```
@@ -91,7 +92,7 @@ Note: `{CLASS}` and `{LANG}` are placeholders that will be replaced with the act
 
 ## **Integration with IDEs**
 
-**Doxypatch** is designed as an external tool, which means it can be easily integrated into any Integrated Development Environment (IDE) that supports external tools. This allows you to use **Doxypatch's** features directly from within your favorite IDE.
+**DoxyPatch** is designed as an external tool, which means it can be easily integrated into any Integrated Development Environment (IDE) that supports external tools. This allows you to use **DoxyPatch's** features directly from within your favorite IDE.
 
 ## **Models**
 
@@ -110,7 +111,7 @@ For more information on customizing these parameters, adding new ones, or learni
 
 ## **Automatic Model Updates**
 
-At every startup, **Doxypatch** checks the hashes of model files in `Models` folder and automatically updates and recreates the model if any changes are detected. This ensures that the model is always up-to-date with the latest prompts and parameters.
+At every startup, **DoxyPatch** checks the hashes of model files in `Models` folder and automatically updates and recreates the model if any changes are detected. This ensures that the model is always up-to-date with the latest prompts and parameters.
 
 ## **With-Context Mode**
 
@@ -124,15 +125,15 @@ A local model ensures your privacy, keeping all data processing on your machine 
 
 ## **License**
 
-**Doxypatch** is licensed under the [**GPL (General Public License)**](https://www.gnu.org/licenses/gpl-3.0.en.html). The full text of the license can be found in the `LICENSE` file.
+**DoxyPatch** is licensed under the [**GPL (General Public License)**](https://www.gnu.org/licenses/gpl-3.0.en.html). The full text of the license can be found in the `LICENSE` file.
 
 The **GNU General Public License** is a free, copyleft license for software and other kinds of works. It ensures that the software remains free and open, and that any modifications or derivative works are also made available under the same license.
 
-Please note that by using **Doxypatch**, you agree to comply with the terms and conditions of the **GPL**.
+Please note that by using **DoxyPatch**, you agree to comply with the terms and conditions of the **GPL**.
 
 ## **Why This Project Matters**
 
-This project serves as an excellent starting point for studying and learning how to modernize old tools by integrating **AI**. **Doxypatch** demonstrates the process of taking a traditional code documentation tool and enhancing it with **AI-powered capabilities**. By working with small, local models, you can gain valuable experience in **AI integration** and optimization, ensuring that even limited resources can produce high-quality results. This project is particularly interesting for those looking to explore **AI** in practical, real-world applications, providing a solid foundation for more advanced **AI projects** in the future.
+This project serves as an excellent starting point for studying and learning how to modernize old tools by integrating **AI**. **DoxyPatch** demonstrates the process of taking a traditional code documentation tool and enhancing it with **AI-powered capabilities**. By working with small, local models, you can gain valuable experience in **AI integration** and optimization, ensuring that even limited resources can produce high-quality results. This project is particularly interesting for those looking to explore **AI** in practical, real-world applications, providing a solid foundation for more advanced **AI projects** in the future.
 
 ## **Contributing**
 
