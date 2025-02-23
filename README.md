@@ -1,3 +1,5 @@
+[![Build and Release](https://github.com/undici77/DoxyPatch/actions/workflows/dotnet-desktop.yml/badge.svg)](https://github.com/undici77/DoxyPatch/actions/workflows/dotnet-desktop.yml)
+
 # **Doxypatch**
 
 A tool for generating and verifying **Doxygen** comments for C, C++, and C# code.
