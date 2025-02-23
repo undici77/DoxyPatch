@@ -1,0 +1,180 @@
+name: Build and Release
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        arch: [x64, arm64]
+        include:
+          - os: ubuntu-latest
+            arch: x64
+            rid: linux-x64
+          - os: ubuntu-latest
+            arch: arm64
+            rid: linux-arm64
+          - os: windows-latest
+            arch: x64
+            rid: win-x64
+          - os: windows-latest
+            arch: arm64
+            rid: win-arm64
+          - os: macos-latest
+            arch: x64
+            rid: osx-x64
+          - os: macos-latest
+            arch: arm64
+            rid: osx-arm64
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Get project version and git hash
+        id: get_version
+        shell: pwsh
+        run: |
+          # Find the .csproj file in the Src directory
+          $project_file = Get-ChildItem -Path Src -Filter *.csproj -Recurse | Select-Object -First 1
+          if (-not $project_file) {
+            throw "No .csproj file found in the Src directory."
+          }
+          # Get the version from the .csproj file
+          [xml]$csproj_xml = Get-Content $project_file.FullName
+          $version_node = $csproj_xml.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -ExpandProperty Version -First 1
+          if (-not $version_node) {
+            throw "Version not found in the .csproj file."
+          }
+          $version = $version_node.Trim()
+          # Get the git hash
+          $git_hash = (git rev-parse --short HEAD).Trim()
+          # Set environment variables
+          echo "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "GIT_HASH=$git_hash" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet publish Src/DoxyPatch.csproj -c Release -r ${{ matrix.rid }} --self-contained -p:PublishSingleFile=true -o output/${{ matrix.rid }}
+        
+      - name: Create zip archive (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # Find the published binary file (for Windows the .exe file) excluding .pdb files
+          $published_file = Get-ChildItem -Path output/${{ matrix.rid }} -File | Where-Object { $_.Extension -ne '.pdb' } | Select-Object -First 1
+          if (-not $published_file) {
+            throw "Published file not found."
+          }
+          $zip_name = "App-v$env:VERSION-$env:GIT_HASH-${{ matrix.rid }}.zip"
+          
+          # Copy the Models folder to a temporary folder
+          $temp_folder = "zip_temp"
+          New-Item -ItemType Directory -Path $temp_folder | Out-Null
+          Copy-Item -Path Models -Destination "$temp_folder\Models" -Recurse
+          
+          # Copy the binary file to the temporary folder
+          Copy-Item -Path $published_file.FullName -Destination "$temp_folder\"
+      
+          # Create the zip
+          Compress-Archive -Path "$temp_folder\*" -DestinationPath $zip_name
+      
+          # Clean up the temporary folder
+          Remove-Item -Recurse -Force $temp_folder
+      
+          echo "ZIP_NAME=$zip_name" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Create zip archive (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          # Find the published binary file that is executable and excludes .pdb files
+          published_file=$(find output/${{ matrix.rid }} -maxdepth 1 -type f -perm -111 ! -name '*.pdb' | head -n 1)
+          if [ -z "$published_file" ]; then
+            echo "Published file not found."
+            exit 1
+          fi
+      
+          zip_name="App-v${{ env.VERSION }}-${{ env.GIT_HASH }}-${{ matrix.rid }}.zip"
+      
+          # Create temporary folder
+          temp_folder="zip_temp"
+          mkdir -p "$temp_folder"
+      
+          # Copy the binary and Models folder to the temporary folder
+          cp "$published_file" "$temp_folder/"
+          cp -r Models "$temp_folder/"
+      
+          # Create the archive without the original folder structure
+          (cd "$temp_folder" && zip -r "../$zip_name" .)
+      
+          # Clean up the temporary folder
+          rm -rf "$temp_folder"
+      
+          echo "ZIP_NAME=$zip_name" >> $GITHUB_ENV
+      
+      - name: Verify ZIP file exists
+        run: |
+          if [ ! -f "${{ env.ZIP_NAME }}" ]; then
+            echo "Artifact file not found: ${{ env.ZIP_NAME }}"
+            exit 1
+          fi
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ matrix.rid }}
+          path: "${{ env.ZIP_NAME }}"
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get project version and git hash
+        id: get_version
+        shell: pwsh
+        run: |
+          $project_file = Get-ChildItem -Path Src -Filter *.csproj -Recurse | Select-Object -First 1
+          if (-not $project_file) {
+            throw "No .csproj file found in the Src directory."
+          }
+          [xml]$csproj_xml = Get-Content $project_file.FullName
+          $version_node = $csproj_xml.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -ExpandProperty Version -First 1
+          if (-not $version_node) {
+            throw "Version not found in the .csproj file."
+          }
+          $version = $version_node.Trim()
+          $git_hash = (git rev-parse --short HEAD).Trim()
+          echo "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "GIT_HASH=$git_hash" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "artifacts/artifacts-*/App-v${{ env.VERSION }}-${{ env.GIT_HASH }}-*.zip"
+          tag_name: "v${{ env.VERSION }}"
+          name: "v${{ env.VERSION }}-${{ env.GIT_HASH }}"
+          body: "Automated release for version v${{ env.VERSION }}-${{ env.GIT_HASH }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
