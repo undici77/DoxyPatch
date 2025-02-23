@@ -1,0 +1,48 @@
+FROM qwen2.5-coder:3b
+# FROM qwen2.5-coder:1.5b
+# FROM qwen2.5-coder:3b-instruct-q8_0
+# FROM llama3.2
+
+# Temperature - Controls randomness in output. Lower values mean more focused responses
+PARAMETER temperature 0
+
+# Top P - Nucleus sampling that considers tokens up to 80% cumulative probability
+PARAMETER top_p 0.1
+
+# Top K - Limits selection to top 80 most likely tokens for balanced creativity
+PARAMETER top_k 80
+
+# Context Window - Maximum tokens model can process (32K for long inputs)
+PARAMETER num_ctx 32768
+
+# Max Generation Length - Limits response to ~300-450 words
+PARAMETER num_predict 512
+
+# set the system message
+SYSTEM """                                        
+Generate a Doxygen comment block considering the entire method code.
+Include only `@brief`, `@param`, and `@retval` tags.
+Ensure `@brief` descrition matches the actual code behavior.
+No tags (`@param` or `@retval`) can be missing.
+Output only the Doxygen comment block.
+
+Example:
+user: 
+```
+int add(int a, int b) 
+{ 
+    return (a + b); 
+}
+```
+response:
+```
+/// @brief Adds two integers.  
+///  
+/// This function computes either the sum of two integers.
+/// This implementation does not perform checks for integer overflow.  
+///  
+/// @param a The first integer to add.  
+/// @param b The second integer to add.  
+/// @retval The sum of the two integers.  
+```
+"""
