@@ -23,7 +23,7 @@ A tool for generating and verifying **Doxygen** comments for C, C++, and C# code
 ## **Requirements**
 
 * **.NET 9** or later 
-* **Ollama AI model** (download instructions below)
+* **Ollama AI backend** (download instructions below)
 * 4GB of RAM on the GPU (for running the **AI model**)
 
 ## **Compile Project from Source Code**
@@ -47,7 +47,7 @@ A tool for generating and verifying **Doxygen** comments for C, C++, and C# code
     `-- doxypatch-with-context
 ```
 
-**Note:** When running **DoxyPatch** with the **Ollama** feature for the first time, if the required models (`DoxyPatch` and `DoxyPatch-with-context`) are not present in the `Models` folder, they will be automatically downloaded. This ensures that you have the necessary models to take full advantage of the **AI-powered** capabilities of **DoxyPatch**.
+**Note:** When running DoxyPatch with the Ollama feature for the first time, if the required models by `doxypatch` and `doxypatch-with-context` are not present in Ollama, they will be automatically downloaded. This process can take a long time depending on your internet connection speed (the 3b model is approximately 2GB). Alternatively, you can manually import models using the scripts `import.sh` or `import.bat` located in the Models directory.
 
 ## **Usage**
 
