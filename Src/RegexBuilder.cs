@@ -129,7 +129,7 @@ public class RegexCPPConstructorExcludeKeywork : RegexObject
     public RegexCPPConstructorExcludeKeywork()
     {
         _Regex_String =
-            @"((?!if\b|else\b|switch\b|case\b|lock\b|using\b|while\b|new\b|catch\b|for\b|foreach\b|public\b|private\b|protected\b|[\s*]))";
+            @"((?!if\b|else\b|switch\b|case\b|lock\b|using\b|while\b|new\b|catch\b|sizeof\b|for\b|foreach\b|public\b|private\b|protected\b|[\s*]))";
     }
 }
 
@@ -141,7 +141,7 @@ public class RegexCPPMethodExcludeKeywork : RegexObject
     public RegexCPPMethodExcludeKeywork()
     {
         _Regex_String =
-            @"((?!if\b|else\b|switch\b|case\b|lock\b|using\b|while\b|new\b|catch\b|for\b|foreach\b|public\b|private\b|protected\b|[\s*])(?:[\w:*_&<>,]+?\s+){1,6})";
+            @"((?!if\b|else\b|switch\b|case\b|lock\b|using\b|while\b|new\b|catch\b|sizeof\b|for\b|foreach\b|public\b|private\b|protected\b|[\s*])(?:[\w:*_&<>,]+?\s+){1,6})";
     }
 }
 
@@ -153,7 +153,7 @@ public class RegexHPPConstructorExcludeKeywork : RegexObject
     public RegexHPPConstructorExcludeKeywork()
     {
         _Regex_String =
-            @"((?!if\b|else\b|switch\b|case\b|lock\b|using\b|while\b|new\b|catch\b|for\b|foreach\b|public\b|private\b|protected\b|[\s*]))";
+            @"((?!if\b|else\b|switch\b|case\b|lock\b|using\b|while\b|new\b|catch\b|sizeof\b|for\b|foreach\b|public\b|private\b|protected\b|[\s*]))";
     }
 }
 
@@ -167,7 +167,7 @@ public class RegexHPPMethodExcludeKeywork : RegexObject
     public RegexHPPMethodExcludeKeywork()
     {
         _Regex_String =
-            @"((?!if\b|else\b|switch\b|case\b|lock\b|using\b|while\b|new\b|catch\b|for\b|foreach\b|public\b|private\b|protected\b|[\s*])(?:[\w:*_&<>,]+?\s+){1,6})";
+            @"((?!if\b|else\b|switch\b|case\b|lock\b|using\b|while\b|new\b|catch\b|sizeof\b|for\b|foreach\b|public\b|private\b|protected\b|[\s*])(?:[\w:*_&<>,]+?\s+){1,6})";
     }
 }
 
@@ -179,7 +179,7 @@ public class RegexCSConstructorExcludeKeywork : RegexObject
     public RegexCSConstructorExcludeKeywork()
     {
         _Regex_String =
-            @"((?!if\b|else\b|switch\b|case\b|lock\b|using\b|while\b|new\b|catch\b|for\b|foreach\b|public\b|private\b|protected\b|[\s*]))";
+            @"((?!if\b|else\b|switch\b|case\b|lock\b|using\b|while\b|new\b|catch\b|sizeof\b|for\b|foreach\b|public\b|private\b|protected\b|[\s*]))";
     }
 }
 
@@ -191,7 +191,7 @@ public class RegexCSMethodExcludeKeywork : RegexObject
     public RegexCSMethodExcludeKeywork()
     {
         _Regex_String =
-            @"((?!if\b|else\b|switch\b|case\b|lock\b|using\b|while\b|new\b|catch\b|for\b|foreach\b|public\b|private\b|protected\b|[\s*])(?:[\w:*_&<>,]+?\s+){1,6})";
+            @"((?!if\b|else\b|switch\b|case\b|lock\b|using\b|while\b|new\b|catch\b|sizeof\b|for\b|foreach\b|public\b|private\b|protected\b|[\s*])(?:[\w:*_&<>,]+?\s+){1,6})";
     }
 }
 
@@ -300,7 +300,7 @@ public class RegexCaptureUntilBodyBegin : RegexObject
     ///
     public RegexCaptureUntilBodyBegin()
     {
-        _Regex_String = @"[^{;]*?(?:^[^\r\n{]*;?[\s]+){0,10}\{([ \t]*)(\r?\n)";
+        _Regex_String = @"(?![^{}#]*[}#])[^{;]*?(?:^[^\r\n{]*;?[\s]+){0,10}\{([ \t]*)(\r?\n)";
     }
 }
 

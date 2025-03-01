@@ -1,0 +1,29 @@
+# Visual Studio temporary files
+*.suo
+*.user
+*.tmp
+*.pdb
+*.cache
+*.obj
+*.bak
+*.ini
+
+# User-specific files
+*.suo
+*.user
+
+# Build output
+.vs/
+bin/
+obj/
+output/
+artifacts/
+
+# Packages
+packages/
+
+# Local application data
+*.local
+
+# Test Results
+TestResults/

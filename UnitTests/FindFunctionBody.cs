@@ -17,8 +17,8 @@ public class FindFunctionBodyTests
 
 		Match match = methodRegex.Match(input);
 		var (start, end) = Utilities.FindFunctionBody(input, match);
-		Assert.Equal(20, start);
-		Assert.Equal(42, end);
+		Assert.Equal(19, start);
+		Assert.Equal(39, end);
 	}
 
 	[Fact]
@@ -34,8 +34,8 @@ public class FindFunctionBodyTests
 		}";
 		Match match = methodRegex.Match(input);
 		var (start, end) = Utilities.FindFunctionBody(input, match);
-		Assert.Equal(20, start);
-		Assert.Equal(42, end);
+		Assert.Equal(19, start);
+		Assert.Equal(39, end);
 	}
 
 	[Fact]
@@ -55,8 +55,8 @@ public class FindFunctionBodyTests
 		}";
 		Match match = methodRegex.Match(input);
 		var (start, end) = Utilities.FindFunctionBody(input, match);
-		Assert.Equal(20, start);
-		Assert.Equal(96, end);
+		Assert.Equal(19, start);
+		Assert.Equal(89, end);
 	}
 
 	[Fact]
@@ -79,8 +79,8 @@ public class FindFunctionBodyTests
 		
 		Match match = methodRegex.Match(input);
 		var (start, end) = Utilities.FindFunctionBody(input, match);
-		Assert.Equal(18, start);
-		Assert.Equal(98, end);
+		Assert.Equal(17, start);
+		Assert.Equal(89, end);
 	}
 
 	[Fact]
@@ -106,8 +106,8 @@ public class FindFunctionBodyTests
 		
 		Match match = methodRegex.Match(input);
 		var (start, end) = Utilities.FindFunctionBody(input, match);
-		Assert.Equal(18, start);
-		Assert.Equal(133, end);
+		Assert.Equal(17, start);
+		Assert.Equal(121, end);
 	}
 
 	[Fact]
@@ -144,8 +144,8 @@ public class FindFunctionBodyTests
 		
 		Match match = methodRegex.Match(input);
 		var (start, end) = Utilities.FindFunctionBody(input, match);
-		Assert.Equal(18, start);
-		Assert.Equal(237, end);
+		Assert.Equal(17, start);
+		Assert.Equal(214, end);
 	}
 
 	[Fact]
@@ -193,8 +193,8 @@ public class FindFunctionBodyTests
 		
 		Match match = methodRegex.Match(input);
 		var (start, end) = Utilities.FindFunctionBody(input, match);
-		Assert.Equal(18, start);
-		Assert.Equal(343, end);
+		Assert.Equal(17, start);
+		Assert.Equal(309, end);
 	}
 
 	[Fact]
@@ -247,8 +247,8 @@ public class FindFunctionBodyTests
 		
 		Match match = methodRegex.Match(input);
 		var (start, end) = Utilities.FindFunctionBody(input, match);
-		Assert.Equal(18, start);
-		Assert.Equal(404, end);
+		Assert.Equal(17, start);
+		Assert.Equal(365, end);
 	}
 
 	[Fact]
@@ -301,18 +301,7 @@ public class FindFunctionBodyTests
 		
 		Match match = methodRegex.Match(input);
 		var (start, end) = Utilities.FindFunctionBody(input, match);
-		Assert.Equal(18, start);
-		Assert.Equal(404, end);
+		Assert.Equal(17, start);
+		Assert.Equal(365, end);
 	}
-
-
-
-
-
-
-
-
-
-
-
 }
