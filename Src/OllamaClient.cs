@@ -15,6 +15,8 @@ class OllamaClient
 	private string _Model;
 	private string _Pre_Prompt;
 	private string _Pre_Prompt_With_Class;
+	private OllamaSharp.Chat _Chat;
+
 
 	/// @brief Initializes a new instance of the OllamaClient class.
 	///        This constructor sets up the client with the specified address, model, and prompts.
@@ -32,6 +34,8 @@ class OllamaClient
 		_Ollama_Client.SelectedModel = model;
 		_Pre_Prompt = pre_prompt;
 		_Pre_Prompt_With_Class = pre_prompt_with_class;
+
+		_Chat = new Chat(_Ollama_Client);
 	}
 
 	/// @brief Checks if the server is online.
@@ -89,8 +93,7 @@ class OllamaClient
 
 		string result = string.Empty;
 
-		var chat = new Chat(_Ollama_Client);
-		await foreach (var answer_token in chat.Send(query))
+		await foreach (var answer_token in _Chat.Send(query))
 		{
 			result += answer_token;
 		}
@@ -125,9 +128,7 @@ class OllamaClient
 		query = "@@@begin_ctx@@@\r\n\r\n" + context + "\r\n\r\n@@@end_ctx@@@";
 
 		string result = string.Empty;
-
-		var chat = new Chat(_Ollama_Client);
-		await foreach (var answer_token in chat.Send(query))
+		await foreach (var answer_token in _Chat.Send(query))
 		{
 			result += answer_token;
 		}

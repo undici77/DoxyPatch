@@ -1,16 +1,22 @@
 FROM qwen2.5-coder:3b
 # FROM qwen2.5-coder:1.5b
 # FROM qwen2.5-coder:3b-instruct-q8_0
-# FROM llama3.2
+# FROM qwen2.5-coder:32b
 
-# Temperature - Controls randomness in output. Lower values mean more focused responses
-PARAMETER temperature 0
+# Temperature - Controls randomness in the output.
+# Lower values (closer to 0) result in more focused and deterministic responses, 
+# while higher values (closer to 1) increase creativity and diversity.
+PARAMETER temperature 0.1
 
-# Top P - Nucleus sampling that considers tokens up to 80% cumulative probability
-PARAMETER top_p 0.1
+# Top P (Nucleus Sampling) - Determines the threshold for cumulative probability in token selection. 
+# Only tokens within the top P% of cumulative probability are considered. 
+# For example, a value of 0.8 means that only the most probable tokens up to 80% of the total probability mass are used.
+PARAMETER top_p 0.8
 
-# Top K - Limits selection to top 80 most likely tokens for balanced creativity
-PARAMETER top_k 80
+# Top K - Limits the selection to the top K most likely tokens.
+# This helps balance creativity and focus by considering only the highest-probability options.
+# For example, a value of 100 means that only the top 100 most probable tokens are considered.
+PARAMETER top_k 100
 
 # Context Window - Maximum tokens model can process (32K for long inputs)
 PARAMETER num_ctx 32768

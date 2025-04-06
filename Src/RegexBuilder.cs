@@ -202,7 +202,7 @@ public class RegexCPPCaptureConstructorName : RegexObject
     ///
     public RegexCPPCaptureConstructorName()
     {
-        _Regex_String = @"([\w:*_&<>,]+)\:\:([\w~_]+\s*)";
+        _Regex_String = @"(?!__attribute__)([\w:*_&<>,]+)\:\:([\w~_]+\s*)";
     }
 }
 
@@ -213,7 +213,7 @@ public class RegexHPPCaptureConstructorName : RegexObject
     ///
     public RegexHPPCaptureConstructorName()
     {
-        _Regex_String = @"([\w:*~_&<>,]+\s*)";
+        _Regex_String = @"(?!__attribute__)([\w:*~_&<>,]+\s*)";
     }
 }
 
@@ -225,7 +225,7 @@ public class RegexCPPCaptureMethodName : RegexObject
     ///
     public RegexCPPCaptureMethodName()
     {
-        _Regex_String = @"([\w:*~_&<>+\-%\/%|=]+\s*)";
+        _Regex_String = @"(?!__attribute__)([\w:*~_&<>+\-%\/%|=]+\s*)";
     }
 }
 
@@ -236,7 +236,7 @@ public class RegexHPPCaptureMethodName : RegexObject
     ///
     public RegexHPPCaptureMethodName()
     {
-        _Regex_String = @"([\w:*~_&<>+\-%\/%|=]+\s*)";
+        _Regex_String = @"(?!__attribute__)([\w:*~_&<>+\-%\/%|=]+\s*)";
     }
 }
 
@@ -287,7 +287,7 @@ public class RegexCaptureConstructorInit : RegexObject
     ///
     public RegexCaptureConstructorInit()
     {
-        _Regex_String = @"(?:\s*:\s*[\w\s,{}().<>*&:_\-""]*\([^)]*\))?";
+        _Regex_String = @"(\s*:\s*((\w+\s*[\(\{]+[^\)\}]*[\)\}]+\,\s*)*(\w+\s*[\(\{]+[^\)\}]*[\)\}]+)+)?)?";
     }
 }
 
@@ -300,7 +300,7 @@ public class RegexCaptureUntilBodyBegin : RegexObject
     ///
     public RegexCaptureUntilBodyBegin()
     {
-        _Regex_String = @"(?![^{}#]*[}#])[^{;]*?(?:^[^\r\n{]*;?[\s]+){0,10}\{([ \t]*)(\r?\n)";
+        _Regex_String = @"[^{;]*?(?:^[^\r\n{]*;?[\s]+){0,1}\{([ \t]*)(\r?\n)";
     }
 }
 
@@ -326,7 +326,7 @@ public class RegexBuilder
 	{
 		return (@"^\s*(?:template\s*<[^>]+>\s*)?(?:class|struct|namespace)\s+([a-zA-Z_][a-zA-Z0-9_]*)\b(?:\s*:\s*(?:virtual|public|private|protected)?\s*[^\{]*)?\s*\{");
 	}
-	
+
 	/// @brief Generates a regular expression pattern for matching C# class, struct, or namespace declarations.
 	///        This function returns a regex pattern that matches the declaration of classes, structs, and namespaces in C#,
 	///        optionally preceded by access modifiers and other keywords. The pattern captures the name of the declared entity.
