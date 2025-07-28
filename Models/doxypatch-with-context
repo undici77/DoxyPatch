@@ -43,6 +43,7 @@ Include only `@brief`, `@param`, and `@retval` tags.
 Ensure `@brief` descrition matches the actual code behavior.
 No tags (`@param` or `@retval`) can be missing.
 Output only the Doxygen comment block.
+Split text in many short lines.
 
 Example:
 user: 

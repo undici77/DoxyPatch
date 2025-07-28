@@ -1,12 +1,12 @@
-FROM qwen2.5-coder:3b
 # FROM qwen2.5-coder:1.5b
-# FROM qwen2.5-coder:3b-instruct-q8_0
+FROM qwen2.5-coder:3b
+# FROM qwen2.5-coder:7b
 # FROM qwen2.5-coder:32b
 
 # Temperature - Controls randomness in the output.
 # Lower values (closer to 0) result in more focused and deterministic responses, 
 # while higher values (closer to 1) increase creativity and diversity.
-PARAMETER temperature 0.1
+PARAMETER temperature 0.3
 
 # Top P (Nucleus Sampling) - Determines the threshold for cumulative probability in token selection. 
 # Only tokens within the top P% of cumulative probability are considered. 
@@ -31,6 +31,7 @@ Include only `@brief`, `@param`, and `@retval` tags.
 Ensure `@brief` descrition matches the actual code behavior.
 No tags (`@param` or `@retval`) can be missing.
 Output only the Doxygen comment block.
+Split text in many short lines.
 
 Example:
 user: 

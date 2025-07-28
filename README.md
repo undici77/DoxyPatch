@@ -4,6 +4,10 @@
 
 A tool for generating and verifying **Doxygen** comments for C, C++, and C# code.
 
+![Demo](./Images/Demo.gif)
+
+
+
 ## **Introduction**
 
 **DoxyPatch** is a command-line tool designed to simplify the creation and verification of **Doxygen** comments for C, C++, and C# code. It utilizes a combination of regular expressions and **AI-powered models** to generate high-quality comments that adhere to the **Doxygen syntax**.
